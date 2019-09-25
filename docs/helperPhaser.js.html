@@ -26,20 +26,20 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let hP;
+            <pre class="prettyprint source linenums"><code>// global variable that holds the main object
+let hP;
 
 // import assets for highlight helper
 import glowSrc from "../assets/glow.png";
 import shineSrc from "../assets/shine.png";
-import {
-    isNumber
-} from "util";
 
 /**
  * @name HelperPhaser
- * @requires loader, TweenTrain
+ * @requires Loader
+ * @requires TweenTrain
  * 
- * @param {Loader} loader - Current used loader to load needed images
+ * @param {Loader} loader - Current used loader to load needed images. It can be any object that has a loadImage function (function LoadImage(key, src))
+ * @param {TweenTrain} TweenTrain - The main TweenTrain class that is instantiated in the code
  * 
  * @class
  * @classdesc A helper file that aims to automate daily tasks in Phaser. Current function list: constrain, dist, getColor, highlightObject, map
@@ -51,6 +51,7 @@ class HelperPhaser {
         hP = this;
 
         /**
+         * @type {object}
          * @author Yusuke Kawasaki
          */
         this.colors = {
@@ -352,7 +353,6 @@ class HelperPhaser {
         loader.loadImage("glowSpark", glowSrc);
         loader.loadImage("shineSpark", shineSrc);
 
-        // setup TweenTrain
         this.TweenTrain = TweenTrain;
     }
 
@@ -477,7 +477,6 @@ class HelperPhaser {
      * @param {Array} objArr - An array of objects for the effects to be applied in
      * @param {integer} ms - The duration of the effect. In mode = 1, 0: instant sparkle
      * @param {Scene} scene - The scene in which the objects resides in
-     * @param {}
      * 
      * @function
      * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
@@ -572,9 +571,28 @@ class HelperPhaser {
                     });
                     o.highlightEmitter.visible = false;
                     o.on("pointerdown", () => {
-                        o.highlighted = false;
-                        o.highlightEmitter.visible = false;
                         o.endHighlight.run();
+                        // when object gets clicked, clean the bejesus out of it
+                        for (let i = 0; i &lt; tempDepths.length; i++) {
+                            if (objArr[i] == o) {
+                                o.setDepth(tempDepths[i]);
+                                o.highlightEmitter.stop();
+                                o.highlighted = false;
+                                delete o.beginHighlight;
+                                delete o.endHighlight;
+                                delete o.highlightEmitter;
+                                delete o.highlighted;
+                                break;
+                            }
+                        }
+                        // if the object already had other input events, delete only this
+                        if (o._events.pointerdown.length > 1) {
+                            o._events.pointerdown.splice(o._events.pointerdown.length - 1, 1);
+                        } else {
+                            // otherwise, delete its pointerdown event object entirely
+                            // this is how Phaser does things normally, so..
+                            delete o._events.pointerdown;
+                        }
                     });
                     // transition duration for the black background to appear or dissapear
                     let rectTransitionDuration = 400;
@@ -606,14 +624,6 @@ class HelperPhaser {
                                         o.highlighted = false;
                                     }
                                 }
-                                // if the object already had other input events, delete only this
-                                if (o._events.pointerdown.length > 1) {
-                                    o._events.pointerdown.splice(o._events.pointerdown.length - 1, 1);
-                                } else {
-                                    // otherwise, delete its pointerdown event object entirely
-                                    // this is how Phaser does things normally, so..
-                                    delete o._events.pointerdown;
-                                }
                             })
                         )
                     }
@@ -641,19 +651,6 @@ class HelperPhaser {
                             onComplete: function () {
                                 scene.highlightRect.alpha = 0;
                                 scene.highlightRect.visible = false;
-                                // when object gets clicked, clean the bejesus out of it
-                                for (let i = 0; i &lt; tempDepths.length; i++) {
-                                    if (objArr[i] == o) {
-                                        o.setDepth(tempDepths[i]);
-                                        o.highlightEmitter.stop();
-                                        o.highlighted = false;
-                                        delete o.beginHighlight;
-                                        delete o.endHighlight;
-                                        delete o.highlightEmitter;
-                                        delete o.highlighted;
-                                        break;
-                                    }
-                                }
                             }
                         }
                     })
@@ -742,7 +739,7 @@ export default HelperPhaser;</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Sep 25 2019 16:04:40 GMT+0300 (GMT+03:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Sep 25 2019 16:58:29 GMT+0300 (GMT+03:00)
 </footer>
 
 <script> prettyPrint(); </script>
