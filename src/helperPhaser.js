@@ -1,11 +1,17 @@
+// global variable that holds the main object
+let hP;
+
 // import assets for highlight helper
 import glowSrc from "../assets/glow.png";
 import shineSrc from "../assets/shine.png";
 
 /**
  * @name HelperPhaser
+ * @requires Loader
+ * @requires TweenTrain
  * 
- * @param {Loader} loader - Current used loader to load needed images
+ * @param {Loader} loader - Current used loader to load needed images. It can be any object that has a loadImage function (function LoadImage(key, src))
+ * @param {TweenTrain} TweenTrain - The main TweenTrain class that is instantiated in the code
  * 
  * @class
  * @classdesc A helper file that aims to automate daily tasks in Phaser. Current function list: constrain, dist, getColor, highlightObject, map
@@ -13,8 +19,11 @@ import shineSrc from "../assets/shine.png";
  * @author Tayfun Turgut <tyfn.trgt@gmail.com>
  */
 class HelperPhaser {
-    constructor(loader) {
+    constructor(loader, TweenTrain) {
+        hP = this;
+
         /**
+         * @type {object}
          * @author Yusuke Kawasaki
          */
         this.colors = {
@@ -315,6 +324,8 @@ class HelperPhaser {
         // load assets for highlight helper
         loader.loadImage("glowSpark", glowSrc);
         loader.loadImage("shineSpark", shineSrc);
+
+        this.TweenTrain = TweenTrain;
     }
 
     /**
@@ -346,7 +357,7 @@ class HelperPhaser {
                 if (!(typeof subCode) == "string") {
                     console.error(`HelperPhaser.GetColor : Sub code must be of type "integer"!`);
                     return false;
-                } else if (!this.colors[colorString][String(subCode)]) {
+                } else if (!this.colors[colorString][subCode]) {
                     console.error(`HelperPhaser.GetColor : Invalid sub code`);
                     return false;
                 }
@@ -365,16 +376,16 @@ class HelperPhaser {
      * @description Constrains the input between min and max values. <br>
      * Useful especially when you don't know the return value of input and want to constrain it somehow. 
      * 
-     * @param {integer} input - Input value to be constrained
-     * @param {integer} min - Minimum value of the constrain
-     * @param {integer} max - Maximum value of the constrain
+     * @param {number} input - Input value to be constrained
+     * @param {number} min - Minimum value of the constrain
+     * @param {number} max - Maximum value of the constrain
      * 
      * @function
      * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
     constrain(input = 0.5, min = 0, max = 1) {
-        if (!Number.isInteger(input) || !Number.isInteger(min) || !Number.isInteger(max)) {
-            console.error(`HelperPhaser.Constrain : All parameters must be of type "integer"!`);
+        if ((typeof input) != "number" || (typeof min) != "number" || (typeof max) != "number") {
+            console.error(`HelperPhaser.Constrain : All parameters must be of type "number"!`);
             return false;
         }
         if (input < min) {
@@ -430,7 +441,6 @@ class HelperPhaser {
 
     /**
      * @name HighlightObject
-     * @requires TweenTrain
      * 
      * @description Highlight an object so that it gains the attention of the user. <br>
      * Really useful for tutorials or in-game events that need user interaction.
@@ -474,20 +484,20 @@ class HelperPhaser {
 
         // create necessary assets on first run
         if (!scene.highlightRect) {
-            scene.highlightRect = scene.add.rectangle(0, 0, currentWidth, currentHeight)
+            scene.highlightRect = scene.add.rectangle(0, 0, scene.currentWidth, scene.currentHeight)
                 .setOrigin(0, 0);
             scene.highlightRect.setFillStyle(0x000000, 1);
             scene.highlightRect.setDepth(1999);
             scene.highlightRect.alpha = 0;
             scene.resizeManager.add(scene.highlightRect, function () {
-                this.setScale(Math.max(currentWidth / this.width, currentHeight / this.height));
+                this.setScale(Math.max(scene.currentWidth / this.width, scene.currentHeight / this.height));
                 this.x = 0;
                 this.y = 0;
             })
             scene.highlightGlowParticle = scene.add.particles("glowSpark");
             scene.highlightShineParticle = scene.add.particles("shineSpark")
             // recursive call to itself
-            highlightObject(mode, objArr, ms, scene);
+            this.highlightObject(mode, objArr, ms, scene);
         } else {
             // highlight mode
             if (mode == 0) {
@@ -495,8 +505,8 @@ class HelperPhaser {
                 scene.highlightObjects = [];
                 for (let o of objArr) {
                     o.setInteractive();
-                    o.beginHighlight = TweenTrain.create(scene);
-                    o.endHighlight = TweenTrain.create(scene);
+                    o.beginHighlight = this.TweenTrain.create(scene);
+                    o.endHighlight = this.TweenTrain.create(scene);
                     o.highlighted = true;
                     // temporarily record the depth of the object
                     tempDepths.push(o.depth);
@@ -511,7 +521,7 @@ class HelperPhaser {
                         blendMode: 'SCREEN',
                         scale: {
                             // scale the scale (!) according to the scale of the object
-                            start: 1 * map(constrain(o.scale, 0.1, 10), 0.1, 10, 1, 2),
+                            start: 1 * this.map(this.constrain(o.scale, 0.1, 10), 0.1, 10, 1, 2),
                             // always ends in 0
                             end: 0
                         },
@@ -533,9 +543,28 @@ class HelperPhaser {
                     });
                     o.highlightEmitter.visible = false;
                     o.on("pointerdown", () => {
-                        o.highlighted = false;
-                        o.highlightEmitter.visible = false;
                         o.endHighlight.run();
+                        // when object gets clicked, clean the bejesus out of it
+                        for (let i = 0; i < tempDepths.length; i++) {
+                            if (objArr[i] == o) {
+                                o.setDepth(tempDepths[i]);
+                                o.highlightEmitter.stop();
+                                o.highlighted = false;
+                                delete o.beginHighlight;
+                                delete o.endHighlight;
+                                delete o.highlightEmitter;
+                                delete o.highlighted;
+                                break;
+                            }
+                        }
+                        // if the object already had other input events, delete only this
+                        if (o._events.pointerdown.length > 1) {
+                            o._events.pointerdown.splice(o._events.pointerdown.length - 1, 1);
+                        } else {
+                            // otherwise, delete its pointerdown event object entirely
+                            // this is how Phaser does things normally, so..
+                            delete o._events.pointerdown;
+                        }
                     });
                     // transition duration for the black background to appear or dissapear
                     let rectTransitionDuration = 400;
@@ -543,12 +572,12 @@ class HelperPhaser {
                     let parallelTrains = [];
                     for (let o of objArr) {
                         parallelTrains.push(
-                            TweenTrain.create(scene)
+                            this.TweenTrain.create(scene)
                             .addEvent(function () {
                                 o.highlightEmitter.visible = true;
                             })
                             .addDelay(function () {
-                                return constrain(ms - rectTransitionDuration * 2, 0, ms)
+                                return hP.constrain(ms - rectTransitionDuration * 2, 0, ms);
                             })
                             .addEvent(function () {
                                 // if user did not click beforehand
@@ -566,14 +595,6 @@ class HelperPhaser {
                                         }
                                         o.highlighted = false;
                                     }
-                                }
-                                // if the object already had other input events, delete only this
-                                if (o._events.pointerdown.length > 1) {
-                                    o._events.pointerdown.splice(o._events.pointerdown.length - 1, 1);
-                                } else {
-                                    // otherwise, delete its pointerdown event object entirely
-                                    // this is how Phaser does things normally, so..
-                                    delete o._events.pointerdown;
                                 }
                             })
                         )
@@ -602,19 +623,6 @@ class HelperPhaser {
                             onComplete: function () {
                                 scene.highlightRect.alpha = 0;
                                 scene.highlightRect.visible = false;
-                                // when object gets clicked, clean the bejesus out of it
-                                for (let i = 0; i < tempDepths.length; i++) {
-                                    if (objArr[i] == o) {
-                                        o.setDepth(tempDepths[i]);
-                                        o.highlightEmitter.stop();
-                                        o.highlighted = false;
-                                        delete o.beginHighlight;
-                                        delete o.endHighlight;
-                                        delete o.highlightEmitter;
-                                        delete o.highlighted;
-                                        break;
-                                    }
-                                }
                             }
                         }
                     })
@@ -638,7 +646,7 @@ class HelperPhaser {
                         blendMode: 'SCREEN',
                         scale: {
                             // scale the scale (!) according to the scale of the object
-                            start: 1 + map(constrain(Math.max(
+                            start: 1 + this.map(this.constrain(Math.max(
                                 o.width * o.scaleX,
                                 o.height * o.scaleY
                             ), 100, 1000), 100, 1000, 0, 2),
@@ -663,13 +671,13 @@ class HelperPhaser {
                     if (ms == 0) {
                         // instant sparkle effect
                         o.sparkleEmitter.explode(20);
-                        TweenTrain.create(scene)
+                        this.TweenTrain.create(scene)
                             .addDelay(300)
                             .addEvent(function () {
                                 o.setDepth(tempDepth);
                             }).run();
                     } else {
-                        TweenTrain.create(scene)
+                        this.TweenTrain.create(scene)
                             .addDelay(ms)
                             .addEvent(function () {
                                 o.sparkleEmitter.stop();
