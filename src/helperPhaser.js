@@ -340,11 +340,12 @@ class HelperPhaser {
      *  
      * @param {string} colorString - A string representing the main name of the color e.g. "red"
      * @param {string} subCode - A subcode to the main color which darkens it as it is increased.
+     * @param {boolean} hex - true: returns with "#" prefix false: returns a number
      * 
      * @function
      * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
-    getColor(colorString = "", subCode = "") {
+    getColor(colorString = "", subCode = "", hex) {
         // validate parameters
         if ((typeof colorString) == "string") {
             if (colorString.length == 0) {
@@ -367,7 +368,11 @@ class HelperPhaser {
             return false;
         }
 
-        return Phaser.Display.Color.HexStringToColor(this.colors[colorString][String(subCode)]).color
+        if (hex) {
+            return this.colors[colorString][String(subCode)];
+        } else {
+            return Phaser.Display.Color.HexStringToColor(this.colors[colorString][String(subCode)]).color;
+        }
     }
 
     /**
@@ -418,7 +423,7 @@ class HelperPhaser {
     }
 
     /**
-     * @name Map
+     * @name MapValue
      * 
      * @description Linearly maps value from the range (a..b) to (c..d)
      * 
@@ -431,7 +436,7 @@ class HelperPhaser {
      * @function
      * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
-    map(value = 0, a = 0, b = 0, c = 0, d = 0) {
+    mapValue(value = 0, a = 0, b = 0, c = 0, d = 0) {
         if ((typeof value != "number") || (typeof a != "number") || (typeof b != "number") || (typeof c != "number") || (typeof d != "number")) {
             console.error(`HelperPhaser.Map : All parameters must be of type "number"!`);
             return false;
