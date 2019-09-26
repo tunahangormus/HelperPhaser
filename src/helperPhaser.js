@@ -23,7 +23,6 @@ class HelperPhaser {
         hP = this;
 
         /**
-         * @name Color Palette with "#" prefix
          * @type {object}
          * @author Yusuke Kawasaki
          */
