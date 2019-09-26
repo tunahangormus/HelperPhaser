@@ -23,6 +23,7 @@ class HelperPhaser {
         hP = this;
 
         /**
+         * @name Color Palette with "#" prefix
          * @type {object}
          * @author Yusuke Kawasaki
          */
@@ -432,7 +433,15 @@ class HelperPhaser {
      * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
     map(value = 0, a = 0, b = 0, c = 0, d = 0) {
-        if (b - a == 0 || d - c == 0) return false;
+        if ((typeof value != "number") || (typeof a != "number") || (typeof b != "number") || (typeof c != "number") || (typeof d != "number")) {
+            console.error(`HelperPhaser.Map : All parameters must be of type "number"!`);
+            return false;
+        } else {
+            if (b - a == 0 || d - c == 0) {
+                console.error(`HelperPhaser.Dist : (max - low) values cannot be 0!`);
+                return false;
+            }
+        }
         // first map value from (a..b) to (0..1)
         value = (value - a) / (b - a);
         // then map it from (0..1) to (c..d) and return it
@@ -692,6 +701,30 @@ class HelperPhaser {
                 }
             }
         }
+    }
+
+    /**
+     * @name GenerateBlankArray
+     * 
+     * @description Generate a blank array in which the value of the elements of the array are equal to their index numbers. <br>
+     * This way, you can just use "for (let i of generateBlankArray(n))" instead of using the "i" syntax. <br>
+     * This is for simplifying for loops and must only be used for the most basic cases. 
+     * 
+     * @param {number} n - Number of elements in the array. 0: generates a blank array with length 0
+     * 
+     * @function
+     * @author Tayfun Turgut <tyfn.trgt@gmail.com>
+     */
+    generateBlankArray(n) {
+        if ((typeof n != "integer")) {
+            console.error(`HelperPhaser.GenerateBlankArray : N must be an integer!`);
+            return false;
+        }
+        let tempArray = [];
+        for (let i = 0; i < n; i++) {
+            tempArray.push(i);
+        }
+        return tempArray;
     }
 }
 
