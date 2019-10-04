@@ -1,37 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>JSDoc: Source: helperPhaser.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
-
-<body>
-
-<div id="main">
-
-    <h1 class="page-title">Source: helperPhaser.js</h1>
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>// global variable that holds the main object
+// global variable that holds the main object
 let hP;
-
-// import assets for highlight helper
-import glowSrc from "../assets/glow.png";
-import shineSrc from "../assets/shine.png";
 
 /**
  * @name HelperPhaser
@@ -44,7 +12,7 @@ import shineSrc from "../assets/shine.png";
  * @class
  * @classdesc A helper file that aims to automate daily tasks in Phaser. Current function list: constrain, dist, getColor, highlightObject, map
  * 
- * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
+ * @author Tayfun Turgut <tyfn.trgt@gmail.com>
  */
 class HelperPhaser {
     constructor(loader, TweenTrain) {
@@ -359,19 +327,19 @@ class HelperPhaser {
     /**
      * @name GetColor
      * 
-     * @description Converts the color from color palette to code usable Phaser Color Type. &lt;br>
-     * Colors: &lt;br>
-     * red, pink, purple, deeppurple, indigo, blue, lightblue, cyan, teal, green, &lt;br>
-     * lightgreen, lime, yellow, amber, orange, deeporange, brown, grey, bluegrey &lt;br>
-     * Subcodes: &lt;br>
-     * 50, 100, 200, ... 900, (a100, a200, a400, a700) &lt;br>
+     * @description Converts the color from color palette to code usable Phaser Color Type. <br>
+     * Colors: <br>
+     * red, pink, purple, deeppurple, indigo, blue, lightblue, cyan, teal, green, <br>
+     * lightgreen, lime, yellow, amber, orange, deeporange, brown, grey, bluegrey <br>
+     * Subcodes: <br>
+     * 50, 100, 200, ... 900, (a100, a200, a400, a700) <br>
      *  
      * @param {string} colorString - A string representing the main name of the color e.g. "red"
      * @param {string} subCode - A subcode to the main color which darkens it as it is increased.
      * @param {boolean} hex - true: returns with "#" prefix false: returns a number
      * 
      * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
+     * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
     getColor(colorString = "", subCode = "", hex) {
         // validate parameters
@@ -404,86 +372,9 @@ class HelperPhaser {
     }
 
     /**
-     * @name Constrain
-     * 
-     * @description Constrains the input between min and max values. &lt;br>
-     * Useful especially when you don't know the return value of input and want to constrain it somehow. 
-     * 
-     * @param {number} input - Input value to be constrained
-     * @param {number} min - Minimum value of the constrain
-     * @param {number} max - Maximum value of the constrain
-     * 
-     * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
-     */
-    constrain(input = 0.5, min = 0, max = 1) {
-        if ((typeof input) != "number" || (typeof min) != "number" || (typeof max) != "number") {
-            console.error(`HelperPhaser.Constrain : All parameters must be of type "number"!`);
-            return false;
-        }
-        if (input &lt; min) {
-            return min;
-        } else if (input > max) {
-            return max;
-        } else {
-            return input;
-        }
-    }
-
-    /**
-     * @name Dist
-     * 
-     * @description Finds the distance between two objects. &lt;br>
-     * If you want to give points, then pass parameters as: dist({x: x1 , y: y1}, {x: x2, y: y2});
-     * 
-     * @param {Object} obj1 - First object
-     * @param {Object} obj2 - Second object
-     * 
-     * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
-     */
-    dist(obj1, obj2) {
-        if (!obj1.x || !obj1.y || !obj2.x || !obj2.y) {
-            console.error(`HelperPhaser.Dist : Invalid object parameter!`);
-            return false;
-        }
-        return Math.sqrt(Math.pow(obj2.x - obj1.x, 2) + Math.pow(obj2.y - obj1.y, 2));
-    }
-
-    /**
-     * @name MapValue
-     * 
-     * @description Linearly maps value from the range (a..b) to (c..d)
-     * 
-     * @param {integer} value - The value to be mapped
-     * @param {integer} a - Lower boundary of input
-     * @param {integer} b - Upper boundary of input
-     * @param {integer} c - Lower boundary of output
-     * @param {integer} d - Upper boundary of output
-     * 
-     * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
-     */
-    mapValue(value = 0, a = 0, b = 0, c = 0, d = 0) {
-        if ((typeof value != "number") || (typeof a != "number") || (typeof b != "number") || (typeof c != "number") || (typeof d != "number")) {
-            console.error(`HelperPhaser.Map : All parameters must be of type "number"!`);
-            return false;
-        } else {
-            if (b - a == 0 || d - c == 0) {
-                console.error(`HelperPhaser.Dist : (max - low) values cannot be 0!`);
-                return false;
-            }
-        }
-        // first map value from (a..b) to (0..1)
-        value = (value - a) / (b - a);
-        // then map it from (0..1) to (c..d) and return it
-        return c + value * (d - c);
-    }
-
-    /**
      * @name HighlightObject
      * 
-     * @description Highlight an object so that it gains the attention of the user. &lt;br>
+     * @description Highlight an object so that it gains the attention of the user. <br>
      * Really useful for tutorials or in-game events that need user interaction.
      * 
      * @param {integer} mode - 0: Highlight mode, 1: Sparkle Mode
@@ -492,11 +383,11 @@ class HelperPhaser {
      * @param {Scene} scene - The scene in which the objects resides in
      * 
      * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
+     * @author Tayfun Turgut <tyfn.trgt@gmail.com>
      */
     highlightObject(mode = 0, objArr = [], ms = 3000, scene) {
         // validate parameters
-        if (mode != 0 &amp;&amp; mode != 1) {
+        if (mode != 0 && mode != 1) {
             console.error(`HelperPhaser.HighlightObject : Invalid highlight mode!`);
             return false;
         } else {
@@ -586,7 +477,7 @@ class HelperPhaser {
                     o.on("pointerdown", () => {
                         o.endHighlight.run();
                         // when object gets clicked, clean the bejesus out of it
-                        for (let i = 0; i &lt; tempDepths.length; i++) {
+                        for (let i = 0; i < tempDepths.length; i++) {
                             if (objArr[i] == o) {
                                 o.setDepth(tempDepths[i]);
                                 o.highlightEmitter.stop();
@@ -735,51 +626,7 @@ class HelperPhaser {
         }
     }
 
-    /**
-     * @name GenerateBlankArray
-     * 
-     * @description Generate a blank array in which the value of the elements of the array are equal to their index numbers. &lt;br>
-     * This way, you can just use "for (let i of generateBlankArray(n))" instead of using the "i" syntax. &lt;br>
-     * This is for simplifying for loops and must only be used for the most basic cases. 
-     * 
-     * @param {number} n - Number of elements in the array. 0: generates a blank array with length 0
-     * 
-     * @function
-     * @author Tayfun Turgut &lt;tyfn.trgt@gmail.com>
-     */
-    generateBlankArray(n) {
-        if ((typeof n != "integer")) {
-            console.error(`HelperPhaser.GenerateBlankArray : N must be an integer!`);
-            return false;
-        }
-        let tempArray = [];
-        for (let i = 0; i &lt; n; i++) {
-            tempArray.push(i);
-        }
-        return tempArray;
-    }
+
 }
 
-export default HelperPhaser;</code></pre>
-        </article>
-    </section>
-
-
-
-
-</div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HelperPhaser.html">HelperPhaser</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Constrain">Constrain</a></li><li><a href="global.html#Dist">Dist</a></li><li><a href="global.html#GenerateBlankArray">GenerateBlankArray</a></li><li><a href="global.html#GetColor">GetColor</a></li><li><a href="global.html#HighlightObject">HighlightObject</a></li><li><a href="global.html#MapValue">MapValue</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Sep 26 2019 18:48:45 GMT+0300 (GMT+03:00)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
-</body>
-</html>
+export default HelperPhaser;
