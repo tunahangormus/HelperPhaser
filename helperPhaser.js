@@ -325,53 +325,6 @@ class HelperPhaser {
     }
 
     /**
-     * @name GetColor
-     * 
-     * @description Converts the color from color palette to code usable Phaser Color Type. <br>
-     * Colors: <br>
-     * red, pink, purple, deeppurple, indigo, blue, lightblue, cyan, teal, green, <br>
-     * lightgreen, lime, yellow, amber, orange, deeporange, brown, grey, bluegrey <br>
-     * Subcodes: <br>
-     * 50, 100, 200, ... 900, (a100, a200, a400, a700) <br>
-     *  
-     * @param {string} colorString - A string representing the main name of the color e.g. "red"
-     * @param {string} subCode - A subcode to the main color which darkens it as it is increased.
-     * @param {boolean} hex - true: returns with "#" prefix false: returns a number
-     * 
-     * @function
-     * @author Tayfun Turgut <tyfn.trgt@gmail.com>
-     */
-    getColor(colorString = "", subCode = "", hex) {
-        // validate parameters
-        if ((typeof colorString) == "string") {
-            if (colorString.length == 0) {
-                console.error(`HelperPhaser.GetColor : 0 length color string was given!`);
-                return false;
-            } else if (!this.colors[colorString]) {
-                console.error(`HelperPhaser.GetColor : Invalid color string!`);
-                return false;
-            } else {
-                if (!(typeof subCode) == "string") {
-                    console.error(`HelperPhaser.GetColor : Sub code must be of type "integer"!`);
-                    return false;
-                } else if (!this.colors[colorString][subCode]) {
-                    console.error(`HelperPhaser.GetColor : Invalid sub code`);
-                    return false;
-                }
-            }
-        } else {
-            console.error(`HelperPhaser.GetColor : Color string must be of type "string"!`);
-            return false;
-        }
-
-        if (hex) {
-            return this.colors[colorString][String(subCode)];
-        } else {
-            return Phaser.Display.Color.HexStringToColor(this.colors[colorString][String(subCode)]).color;
-        }
-    }
-
-    /**
      * @name HighlightObject
      * 
      * @description Highlight an object so that it gains the attention of the user. <br>
